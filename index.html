@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=10" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png?v=10" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=10" />
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=10" />
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=10" />
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=10" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=10" />
+<title>Felix VPN</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0a1a;--bg2:#181029;--bg3:#241a3a;--card:rgba(30,20,50,0.82);--card-border:rgba(255,215,235,0.15);--text:#f5edff;--muted:#c9b8e0;--accent:#ff8ec4;--accent2:#b18aff;--accent3:#89d9ff;--shadow:0 16px 40px rgba(0,0,0,0.55);--glow:0 0 30px rgba(255,150,210,0.12);--radius:28px;--font:'Segoe UI','Trebuchet MS',system-ui,sans-serif}
+.light{--bg:#fcf6ff;--bg2:#f5edff;--bg3:#efe6ff;--card:rgba(255,248,255,0.85);--card-border:rgba(180,130,200,0.18);--text:#3f2d4a;--muted:#7a6690;--accent:#f07bb0;--accent2:#a07be8;--accent3:#70cfff;--shadow:0 16px 40px rgba(130,80,170,0.15);--glow:0 0 30px rgba(255,150,210,0.08)}
+body{font-family:var(--font);min-height:100vh;color:var(--text);transition:background 0.4s,color 0.3s;padding:0 16px;background:radial-gradient(circle at 10% 20%, rgba(255,150,210,0.18) 0%, transparent 30%),radial-gradient(circle at 90% 60%, rgba(150,130,255,0.18) 0%, transparent 30%),radial-gradient(circle at 50% 100%, rgba(100,210,255,0.10) 0%, transparent 25%),linear-gradient(145deg,var(--bg3) 0%,var(--bg2) 40%,var(--bg) 100%);background-attachment:fixed}
+.bg-paws{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-paws span{position:absolute;font-size:clamp(24px,3.5vw,40px);opacity:0.08;filter:drop-shadow(0 0 12px rgba(255,176,214,0.2));animation:floatPaw 18s infinite alternate ease-in-out}
+.bg-paws span:nth-child(1){left:5%;top:12%;animation-duration:16s}.bg-paws span:nth-child(2){left:20%;top:72%;animation-duration:20s}.bg-paws span:nth-child(3){left:42%;top:22%;animation-duration:14s}.bg-paws span:nth-child(4){left:62%;top:80%;animation-duration:22s}.bg-paws span:nth-child(5){left:80%;top:18%;animation-duration:17s}.bg-paws span:nth-child(6){left:92%;top:65%;animation-duration:19s}
+@keyframes floatPaw{0%{transform:translateY(0) rotate(0) scale(1)}50%{transform:translateY(-18px) rotate(6deg) scale(1.05)}100%{transform:translateY(0) rotate(0) scale(1)}}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:10;padding:12px 24px;background:rgba(13,10,26,0.7);backdrop-filter:blur(18px);border-bottom:1px solid var(--card-border);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;box-shadow:0 4px 30px rgba(0,0,0,0.3)}
+.light .topbar{background:rgba(252,246,255,0.75)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.4rem;color:var(--text);text-decoration:none}
+.logo img{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px rgba(255,255,255,0.15),0 0 20px rgba(180,120,255,0.4);background:#000}
+.nav{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-right:60px}
+.nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:0.95rem;padding:4px 2px;border-bottom:2px solid transparent;transition:0.2s}
+.nav a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.nav .toggle-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;padding:8px 16px;border-radius:40px;font-weight:700;cursor:pointer;font-size:0.9rem}
+.profile-circle-wrap{position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:11}
+.profile-circle{width:44px;height:44px;border-radius:50%;cursor:pointer;background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);border:1px solid rgba(255,215,235,0.25);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3),0 0 20px rgba(255,150,210,0.15);transition:transform 0.2s}
+.profile-circle:hover{transform:scale(1.08)}
+.profile-circle img{width:100%;height:100%;object-fit:cover}
+.default-icon{width:28px;height:28px;background:rgba(0,0,0,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted)}
+.container{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:100px 16px 50px}
+.hero-card{background:var(--card);backdrop-filter:blur(14px);border:1px solid var(--card-border);border-radius:var(--radius);padding:40px 30px 32px;text-align:center;box-shadow:var(--shadow),var(--glow);margin-bottom:42px}
+.hero-badge{display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:100px;padding:8px 22px;font-size:0.85rem;font-weight:700;color:var(--accent);margin-bottom:14px}
+.hero-badge::before{content:'🐾 '}
+.hero-card h1{font-size:clamp(2.4rem,5vw,3.8rem);margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-card p{max-width:680px;margin:0 auto;color:var(--muted);font-size:1.05rem;line-height:1.7}
+.furry-divider{width:120px;height:4px;margin:18px auto 0;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3))}
+.section{margin-bottom:48px}
+.section-title{display:flex;align-items:center;justify-content:center;gap:12px;font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:22px}
+.section-title::before,.section-title::after{content:'✦';font-size:1.4rem;color:var(--accent2);opacity:0.6}
+.card{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--card-border);border-radius:var(--radius);padding:24px 28px;box-shadow:var(--shadow);margin-top:12px;transition:transform 0.25s}
+.card:hover{transform:translateY(-4px)}
+.card h3{font-size:1.3rem;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.card p{color:var(--muted);line-height:1.7;margin-bottom:10px}.card p b{color:var(--accent)}
+.buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 28px;border-radius:60px;background:linear-gradient(135deg,var(--accent),var(--accent2) 50%,var(--accent3));color:#fff;font-weight:800;font-size:0.95rem;text-decoration:none;border:1px solid rgba(255,255,255,0.12);min-width:140px}
+.btn::after{content:'🐾'}
+.support-name{display:inline-block;padding:8px 20px;border-radius:60px;background:rgba(255,255,255,0.05);border:1px solid var(--card-border);font-weight:600;margin-bottom:16px;color:var(--accent)}
+.soft-note{color:var(--muted);font-size:0.9rem;opacity:0.7;text-align:center;margin-top:8px}.center{text-align:center}
+.footer{margin-top:50px;padding:30px 0 20px;border-top:1px solid var(--card-border);text-align:center;color:var(--muted);font-size:0.85rem;opacity:0.6}
+#cabinetOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:99;display:none;opacity:0;transition:opacity 0.3s}
+#cabinetOverlay.active{display:block;opacity:1}
+#profilePanel{position:fixed;top:72px;right:16px;z-index:100;width:390px;max-width:90vw;background:rgba(60,30,80,0.78);backdrop-filter:blur(40px);border:1px solid rgba(255,215,235,0.25);border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,0.5);padding:20px;transform:scale(0.9) translateY(-10px);opacity:0;pointer-events:none;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.25s}
+#profilePanel.active{transform:scale(1) translateY(0);opacity:1;pointer-events:auto}
+#profilePanel.compact{min-height:110px;display:flex;align-items:center;justify-content:center}
+.cabinet-avatar-corner{position:absolute;top:-12px;right:-8px;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,215,235,0.3);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+.cabinet-avatar-corner img{width:100%;height:100%;object-fit:cover}
+.cabinet-pill{width:100%;height:72px;border-radius:28px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.35);color:#fff;font-size:1.15rem;font-weight:600;display:flex;align-items:center;padding:0 28px;cursor:pointer;transition:transform 0.2s,background 0.2s;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.2)}
+.cabinet-pill:last-child{margin-bottom:0}.cabinet-pill:hover{background:rgba(255,255,255,0.14);transform:translateY(-2px) scale(1.01)}
+.cabinet-pill.widget{cursor:default;opacity:0.9}.cabinet-pill.widget:hover{transform:none;background:rgba(255,255,255,0.08)}
+.cabinet-stack{display:flex;flex-direction:column;gap:0}.cabinet-stack.compact{justify-content:center;height:100%}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal{width:100%;max-width:440px;background:rgba(40,20,60,0.85);backdrop-filter:blur(40px);border:1px solid rgba(255,215,235,0.25);border-radius:32px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto;animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes modalIn{from{transform:scale(0.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal h2{font-size:1.6rem;margin-bottom:20px;color:#fff;text-align:center}
+.modal .tabs{display:flex;gap:8px;background:rgba(0,0,0,0.3);border-radius:20px;padding:4px;margin-bottom:20px}
+.modal .tab{flex:1;padding:10px;border-radius:16px;text-align:center;cursor:pointer;font-weight:600;color:var(--muted);transition:0.2s}
+.modal .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.input-wrap{position:relative;margin-bottom:16px}
+.glass-input{width:100%;height:56px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:0 48px 0 20px;font-size:1rem;outline:none;transition:border 0.2s,background 0.2s}
+.glass-input:focus{border-color:var(--accent);background:rgba(255,255,255,0.10)}
+.glass-input::placeholder{color:rgba(255,255,255,0.4)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:20px;opacity:0.6}
+.glass-btn{width:100%;height:56px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-weight:700;font-size:1rem;cursor:pointer;transition:transform 0.2s}
+.glass-btn:hover{transform:translateY(-2px)}
+.text-link{font-size:14px;color:rgba(255,255,255,0.7);text-decoration:underline;cursor:pointer;background:none;border:none;margin-top:8px}
+.error-text{color:#ff6b8a;font-size:13px;margin-top:6px;display:none}.success-text{color:#4ade80;font-size:14px;margin-top:10px;text-align:center;display:none}
+.full-page{position:fixed;inset:0;background:#0d0a1a;z-index:150;display:none;overflow-y:auto;padding:100px 16px 40px}
+.full-page.active{display:block}
+.full-page-inner{max-width:600px;margin:0 auto}
+.back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;margin-bottom:20px}
+.avatar-big{width:120px;height:120px;border-radius:50%;margin:0 auto 20px;display:block;object-fit:cover;background:rgba(255,255,255,0.08);border:2px solid rgba(255,215,235,0.3);cursor:pointer}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.kpi{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:16px;text-align:center}
+.kpi .num{font-size:1.4rem;font-weight:800;color:#fff}.kpi .lab{font-size:12px;color:var(--muted);margin-top:4px}
+.graph-wrap{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:20px;margin:20px 0}
+.periods{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.period{padding:8px 14px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--muted);cursor:pointer;font-size:13px}
+.period.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+.bars{display:flex;align-items:end;gap:6px;height:140px;padding-bottom:30px;position:relative}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.bar{width:100%;background:linear-gradient(to top,var(--accent),var(--accent2));border-radius:8px 8px 4px 4px;min-height:4px;transition:height 0.5s;cursor:pointer}
+.bar:hover{filter:brightness(1.2)}
+.bar-label{font-size:10px;color:rgba(255,255,255,0.6);position:absolute;bottom:-22px;white-space:nowrap;transform:rotate(-10deg)}
+.tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:10;margin-bottom:8px}
+.bar-wrap:hover .tooltip{opacity:1}
+.tooltip .t-date{font-size:11px;color:rgba(255,255,255,0.7)}.tooltip .t-price{font-size:13px;font-weight:700;color:#fff;margin-top:2px}
+.buyer-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
+.buyer{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.buyer .name{color:#fff;font-size:14px}.buyer .prod{color:var(--muted);font-size:12px}.buyer .price{color:var(--accent);font-weight:700}
+.bank-select{width:100%;height:56px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:0 20px;font-size:1rem;outline:none}
+.bank-select option{background:#1a102c;color:#fff}
+.qr-box{width:220px;height:220px;background:#fff;border-radius:16px;margin:20px auto;padding:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.qr-grid{display:grid;grid-template-columns:repeat(25,1fr);grid-template-rows:repeat(25,1fr);width:100%;height:100%;gap:1px}
+.qr-cell{background:#fff}.qr-cell.black{background:#000}
+.timer{font-size:1.2rem;font-weight:700;color:var(--accent);text-align:center;margin:10px 0}
+.scan-pulse{width:100%;height:4px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanMove 2s infinite;position:absolute;top:0;left:0}
+@keyframes scanMove{0%{top:0}100%{top:100%}}
+@media (max-width:760px){.topbar{padding:10px 16px;flex-direction:column;gap:8px}.nav{margin-right:0;gap:12px;justify-content:center}.profile-circle-wrap{top:10px;transform:none}.container{padding-top:130px}#profilePanel{top:110px;right:50%;transform:translateX(50%) scale(0.9);width:92vw}#profilePanel.active{transform:translateX(50%) scale(1)}.kpi-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg-paws" aria-hidden="true"><span>🐾</span><span>🐾</span><span>🐾</span><span>🐾</span><span>🐾</span><span>🐾</span></div>
+<header class="topbar">
+<a href="#" class="logo"><img src="/logo.png?v=10" alt="Felix" />Felix VPN</a>
+<nav class="nav">
+<a href="#instructions">Инструкция</a><a href="#install">Установка</a><a href="#subscribe">Подписка</a><a href="#support">Поддержка</a>
+<button class="toggle-btn" onclick="toggleTheme()">🌙 / ☀</button>
+</nav>
+<div class="profile-circle-wrap"><div class="profile-circle" id="profileCircle" onclick="toggleCabinet()"><div class="default-icon" id="profileIcon">👤</div><img id="profileCircleImg" style="display:none" /></div></div>
+</header>
+<div id="cabinetOverlay" onclick="closeCabinet()"></div>
+<div id="profilePanel"></div>
+<div class="container">
+<section class="hero-card"><div class="content"><h1>Felix VPN</h1><div class="furry-divider"></div></div></section>
+<section class="section" id="instructions"><h2 class="section-title">ИНСТРУКЦИЯ</h2><div class="card"><p>1. Перейдите в раздел <b>Установка VPN</b> и установите приложение.</p><p>2. После установки перейдите в раздел <b>Подписка</b> и нажмите кнопку.</p><p>3. Включите сортировку по пингу в <b>Настройки</b> → <b>Подписки</b> в самом низу.</p><p>4. Обновите пинг серверов.</p><p>5. Выберите сервер и нажмите <b>ВКЛ</b>.</p></div></section>
+<section class="section" id="install"><h2 class="section-title">УСТАНОВКА VPN</h2>
+<div class="card"><h3>iOS</h3><div class="buttons"><a class="btn" href="https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973"><span class="btn-text">App Store (RU)</span></a><a class="btn" href="https://apps.apple.com/us/app/happ-proxy-utility/id6504287215"><span class="btn-text">App Store (Global)</span></a></div></div>
+<div class="card"><h3>Android</h3><div class="buttons"><a class="btn" href="https://play.google.com/store/apps/details?id=com.happproxy"><span class="btn-text">Google Play</span></a><a class="btn" href="https://github.com/Happ-proxy/happ-android/releases/latest/download/Happ.apk"><span class="btn-text">APK</span></a></div></div>
+<div class="card"><h3>Linux</h3><p class="soft-note">Выберите версию под вашу архитектуру</p><div class="buttons"><a class="btn" href="https://github.com/pluralplay/FlClashX/releases/latest/download/FlClashX-linux-amd64.deb"><span class="btn-text">amd64 (.deb)</span></a><a class="btn" href="https://github.com/pluralplay/FlClashX/releases/latest/download/FlClashX-linux-amd64.AppImage"><span class="btn-text">amd64 (AppImage)</span></a><a class="btn" href="https://github.com/pluralplay/FlClashX/releases/latest/download/FlClashX-linux-amd64.rpm"><span class="btn-text">amd64 (.rpm)</span></a><a class="btn" href="https://github.com/pluralplay/FlClashX/releases/latest/download/FlClashX-linux-arm64.deb"><span class="btn-text">arm64 (.deb)</span></a></div></div>
+<div class="card"><h3>Windows</h3><div class="buttons"><a class="btn" href="https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe"><span class="btn-text">Скачать</span></a></div></div>
+</section>
+<section class="section center"><h2 class="section-title">Инструкции для TV</h2>
+<div class="card"><h3>Android TV</h3><div class="buttons"><a class="btn" href="https://www.happ.su/main/ru/faq/android-tv"><span class="btn-text">RU</span></a><a class="btn" href="https://www.happ.su/main/faq/android-tv"><span class="btn-text">EN</span></a></div></div>
+<div class="card"><h3>Apple TV</h3><div class="buttons"><a class="btn" href="https://www.happ.su/main/ru/faq/android-tv"><span class="btn-text">RU</span></a><a class="btn" href="https://www.happ.su/main/faq/android-tv"><span class="btn-text">EN</span></a></div></div>
+</section>
+<section class="section center" id="subscribe"><h2 class="section-title">ПОДПИСКА</h2><div class="card"><p style="color:var(--muted);margin-bottom:16px;text-align:center">Один раз и навсегда — <b style="color:var(--accent)">150₽</b></p><div class="buttons"><button class="btn" onclick="handleSubscribeClick()"><span class="btn-text">Добавить подписку</span></button></div><p id="subStatus" style="color:var(--muted);font-size:13px;margin-top:12px;text-align:center;display:none"></p></div></div></section>
+<section class="section center" id="support"><h2 class="section-title">ПОДДЕРЖКА</h2><div class="card"><div class="support-name"><b>Max</b> ✦ ваш пушистый саппорт</div><div class="buttons"><a class="btn" href="tel:+79827755596"><span class="btn-text">Позвонить</span></a></div><p style="margin-top:18px;"><b>Telegram</b></p><div class="buttons"><a class="btn" href="https://t.me/Felix_dog1785"><span class="btn-text">Написать</span></a></div></div></section>
+<div class="footer">Felix VPN © 2026 — пушистый VPN для пушистых 🐾</div>
+</div>
+
+<div class="modal-overlay" id="authOverlay" onclick="if(event.target===this)closeAuth()"><div class="modal"><h2 id="authTitle">Вход</h2><div class="tabs"><div class="tab active" id="tabLogin" onclick="switchAuth('login')">Вход</div><div class="tab" id="tabReg" onclick="switchAuth('reg')">Регистрация</div></div>
+<div id="loginForm"><div class="input-wrap"><input class="glass-input" id="loginEmail" placeholder="Email" type="email"></div><div class="input-wrap"><input class="glass-input" id="loginPass" placeholder="Пароль" type="password"><button class="eye-btn" onclick="toggleEye('loginPass',this)">👁️</button></div><button class="text-link" onclick="openForgot()">Забыли пароль?</button><div class="error-text" id="loginErr"></div><button class="glass-btn" style="margin-top:16px" onclick="doLogin()">Войти</button></div>
+<div id="regForm" style="display:none"><div class="input-wrap"><input class="glass-input" id="regName" placeholder="Имя"></div><div class="input-wrap"><input class="glass-input" id="regEmail" placeholder="Email" type="email"></div><div class="input-wrap"><input class="glass-input" id="regPass" placeholder="Пароль" type="password"><button class="eye-btn" onclick="toggleEye('regPass',this)">👁️</button></div><div class="input-wrap"><input class="glass-input" id="regPass2" placeholder="Подтвердите пароль" type="password"><button class="eye-btn" onclick="toggleEye('regPass2',this)">👁️</button></div><div class="error-text" id="regErr"></div><button class="glass-btn" style="margin-top:16px" onclick="doReg()">Зарегистрироваться</button></div>
+</div></div>
+
+<div class="modal-overlay" id="forgotOverlay"><div class="modal"><button class="back-btn" onclick="closeForgot()">← Назад</button>
+<div id="forgotStep1"><h2>Восстановление</h2><p style="color:var(--muted);text-align:center;margin-bottom:16px">Введите почту</p><div class="input-wrap"><input class="glass-input" id="forgotEmail" placeholder="Email"></div><div class="error-text" id="forgotErr1"></div><button class="glass-btn" style="margin-top:12px" onclick="sendCode()">Отправить код</button></div>
+<div id="forgotStep2" style="display:none"><h2>Введите код</h2><p style="color:var(--muted);text-align:center;margin-bottom:8px">Код на <span id="forgotEmailShow"></span></p><div id="demoCodeBox" style="display:none"></div><div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;text-align:center;margin-bottom:12px;color:var(--muted);font-size:13px">Код отправлен на вашу почту</div><div class="input-wrap"><input class="glass-input" id="forgotCode" placeholder="123456" maxlength="6"></div><div class="error-text" id="forgotErr2"></div><button class="glass-btn" style="margin-top:12px" onclick="checkCode()">Подтвердить</button><button class="text-link" style="display:block;margin:12px auto 0" onclick="sendCode(true)">Отправить повторно</button></div>
+<div id="forgotStep3" style="display:none"><h2>Новый пароль</h2><div class="input-wrap"><input class="glass-input" id="newPass1" placeholder="Ввести новый пароль" type="password"><button class="eye-btn" onclick="toggleEye('newPass1',this)">👁️</button></div><div class="input-wrap"><input class="glass-input" id="newPass2" placeholder="Подтвердить" type="password"><button class="eye-btn" onclick="toggleEye('newPass2',this)">👁️</button></div><div class="error-text" id="forgotErr3"></div><div class="success-text" id="forgotSuccess">Пароль изменен</div><button class="glass-btn" style="margin-top:12px" onclick="setNewPass()">Сменить пароль</button></div>
+</div></div>
+
+<div class="full-page" id="profilePage"><div class="full-page-inner"><button class="back-btn" onclick="closeFullPage('profilePage')">← Назад</button><h2 style="text-align:center;font-size:2rem;margin-bottom:20px">Настройка профиля</h2><img class="avatar-big" id="avatarBig" onclick="document.getElementById('avatarInput').click()"><input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)"><div class="input-wrap"><input class="glass-input" id="pName" placeholder="Имя"></div><div class="input-wrap"><input class="glass-input" id="pEmail" placeholder="Email"></div><button class="glass-btn" style="margin-top:12px" onclick="saveProfile()">Сохранить</button><button class="glass-btn" style="margin-top:12px;background:rgba(255,80,100,0.2);border:1px solid rgba(255,80,100,0.4)" onclick="logout()">Выйти</button>
+<button class="glass-btn" style="margin-top:12px;background:rgba(255,0,0,0.25);border:1px solid rgba(255,0,0,0.5);color:#ffaaaa" onclick="deleteAccount()">🗑️ Удалить аккаунт</button>
+<div id="delAccErr" class="error-text" style="display:none;margin-top:10px"></div></div></div>
+
+<div class="full-page" id="statsPage"><div class="full-page-inner"><button class="back-btn" onclick="closeFullPage('statsPage')">← Назад</button><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><h2 style="font-size:2rem">Статистика</h2><button class="glass-btn" style="width:auto;padding:0 20px;height:44px;border-radius:22px;font-size:14px" onclick="openWithdraw()">Вывести деньги</button></div><div class="kpi-grid"><div class="kpi"><div class="num" id="kpiTotal">0 ₽</div><div class="lab">Общий баланс</div></div><div class="kpi"><div class="num" id="kpiCount">0</div><div class="lab">Всего продаж</div></div><div class="kpi"><div class="num" id="kpiToday">0 ₽</div><div class="lab">За сегодня</div></div></div><div class="graph-wrap"><div class="periods"><div class="period active" onclick="setPeriod('1 день',this)">1 день</div><div class="period" onclick="setPeriod('Неделя',this)">Неделя</div><div class="period" onclick="setPeriod('Месяц',this)">Месяц</div><div class="period" onclick="setPeriod('Год',this)">Год</div></div><div class="bars" id="bars"></div></div><h3 style="margin:20px 0 12px">Покупатели</h3><div class="buyer-list" id="buyerList"></div></div></div>
+
+<div class="full-page" id="withdrawPage"><div class="full-page-inner"><button class="back-btn" onclick="closeFullPage('withdrawPage');openFullPage('statsPage')">← Назад</button><h2 style="text-align:center;font-size:2rem;margin-bottom:12px">Вывести деньги</h2><div style="text-align:center;color:var(--accent);font-size:1.2rem;margin-bottom:20px" id="withdrawAvail">Доступно: 0 ₽</div><div class="input-wrap"><input class="glass-input" id="wAmount" placeholder="Сумма" type="number"><button class="eye-btn" style="right:60px;font-size:12px" onclick="setMax()">Макс</button></div><div id="cardFields"><div class="input-wrap"><input class="glass-input" id="wCardNum" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)"></div><div class="input-wrap"><input class="glass-input" id="wExp" placeholder="Срок ММ/ГГ" maxlength="5" oninput="formatExp(this)"></div><div class="input-wrap"><input class="glass-input" id="wCvc" placeholder="CVC код" type="password" maxlength="3"><button class="eye-btn" onclick="toggleEye('wCvc',this)">👁️</button></div><div class="input-wrap"><input class="glass-input" id="wName" placeholder="Имя получателя"></div></div><div class="input-wrap"><select class="bank-select" id="wBank"><option value="">Выберите банк</option><option>Озон Банк</option><option>Тинькофф</option><option>Альфа</option><option>Сбер</option><option>ВТБ</option></select></div><div class="input-wrap"><select class="bank-select" id="wMethod" onchange="onMethodChange()"><option value="card">По номеру карты</option><option value="sbp">СБП по телефону</option><option value="yumoney">ЮMoney</option><option value="account">На счет</option></select></div><div id="sbpPhoneWrap" style="display:none" class="input-wrap"><input class="glass-input" id="wPhone" placeholder="+7 999 123 45 67"></div><div class="error-text" id="wErr"></div><div class="success-text" id="wSuccess"></div><button class="glass-btn" style="margin-top:16px" onclick="doWithdraw()">Вывести</button></div></div>
+
+<div class="full-page" id="qrPage"><div class="full-page-inner" style="text-align:center"><button class="back-btn" onclick="closeFullPage('qrPage');openFullPage('withdrawPage')">← Назад</button><h2 style="font-size:2rem">Оплата по СБП</h2><div style="color:var(--accent);margin:12px 0" id="qrAmount"></div><div style="color:var(--muted);font-size:14px" id="qrBank"></div><div class="qr-box" id="qrBox"><div class="scan-pulse" id="scanPulse" style="display:none"></div><div class="qr-grid" id="qrGrid"></div></div><div class="timer" id="qrTimer">05:00</div><p style="color:var(--muted);font-size:14px" id="qrStatus">Отсканируйте QR в приложении банка и подтвердите в банке</p><button class="glass-btn" style="margin-top:16px;background:rgba(255,255,255,0.08)" onclick="cancelQR()">Отменить</button><button class="glass-btn" id="newQrBtn" style="margin-top:12px;display:none" onclick="createQR()">Создать новый QR</button></div></div>
+
+
+<div class="full-page" id="subPayPage">
+<div class="full-page-inner">
+<button class="back-btn" onclick="closeFullPage('subPayPage')">← Назад</button>
+<h2 style="text-align:center;font-size:2rem;margin-bottom:8px">Оплата подписки</h2>
+<p style="text-align:center;color:var(--muted);margin-bottom:20px">Доступ навсегда за <b style="color:var(--accent);font-size:1.3rem">150₽</b> — один раз и навсегда</p>
+
+<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:16px;margin-bottom:20px">
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="period active" id="payTabCard" onclick="switchPayTab('card')">💳 Картой</button>
+<button class="period" id="payTabSbp" onclick="switchPayTab('sbp')">📱 СБП</button>
+<button class="period" id="payTabBot" onclick="switchPayTab('bot')">🤖 Через бота</button>
+</div>
+
+<div id="payCardForm">
+<div class="input-wrap"><input class="glass-input" id="subCardNum" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)"></div>
+<div class="input-wrap"><input class="glass-input" id="subExp" placeholder="Срок ММ/ГГ" maxlength="5" oninput="formatExp(this)"></div>
+<div class="input-wrap"><input class="glass-input" id="subCvc" placeholder="CVC" type="password" maxlength="3"><button class="eye-btn" onclick="toggleEye('subCvc',this)">👁️</button></div>
+<div class="input-wrap"><input class="glass-input" id="subName" placeholder="Имя на карте"></div>
+<button class="glass-btn" style="margin-top:12px" onclick="payWithCard()">Оплатить 150₽</button>
+</div>
+
+<div id="paySbpForm" style="display:none;text-align:center">
+<div class="qr-box" style="margin:0 auto 16px"><div class="scan-pulse" id="subScanPulse" style="display:none"></div><div class="qr-grid" id="subQrGrid"></div></div>
+<div class="timer" id="subQrTimer">05:00</div>
+<p style="color:var(--muted);font-size:13px;margin-bottom:12px" id="subSbpStatus">Отсканируйте QR в приложении банка и подтвердите оплату 150₽</p>
+<button class="glass-btn" style="background:rgba(255,255,255,0.08)" onclick="closeFullPage('subPayPage')">Отменить</button>
+<button class="glass-btn" id="subNewQrBtn" style="margin-top:12px;display:none" onclick="createSubQR()">Новый QR</button>
+</div>
+
+<div id="payBotForm" style="display:none">
+<div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:16px">
+<p style="color:#fff;font-weight:600;margin-bottom:8px">🤖 Оплата через Telegram бота</p>
+<p style="color:var(--muted);font-size:13px;line-height:1.5">Если вы уже оплатили подписку через нашего бота, введите ваш Telegram @username и мы проверим оплату. Если оплата найдена — подписка выдастся сразу.</p>
+</div>
+<div class="input-wrap"><input class="glass-input" id="botUsername" placeholder="@username Telegram"></div>
+<div class="error-text" id="botErr" style="display:none"></div>
+<div class="success-text" id="botSuccess" style="display:none"></div>
+<button class="glass-btn" style="margin-top:12px" onclick="checkBotPayment()">Проверить оплату в боте</button>
+<div style="margin-top:16px;text-align:center"><a href="https://t.me/FelixVpnbot_bot" target="_blank" style="color:var(--accent);font-size:13px;text-decoration:none">→ Перейти к боту @FelixVpnbot_bot</a></div>
+<div style="margin-top:12px;background:rgba(255,255,255,0.04);border-radius:12px;padding:10px"><p style="color:var(--muted);font-size:12px;text-align:center">Бот принимает оплату 150₽ и автоматически выдает доступ. После оплаты в боте нажмите "Проверить".</p></div>
+</div>
+
+</div>
+
+<div class="error-text" id="subPayErr" style="text-align:center"></div>
+<div class="success-text" id="subPaySuccess" style="text-align:center"></div>
+
+<div id="subAfterPay" style="display:none;text-align:center;margin-top:20px">
+<div style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:20px;padding:20px">
+<p style="color:#4ade80;font-weight:700;font-size:1.2rem;margin-bottom:8px">✅ Оплата успешна!</p>
+<p style="color:var(--muted);font-size:14px;margin-bottom:16px">Теперь вы можете добавить подписку</p>
+<button class="glass-btn" onclick="giveSubscription()">Добавить подписку в VPN</button>
+</div>
+</div>
+
+</div>
+</div>
+
+
+<script>
+let currentPeriod='1 день';let currentUser=null;
+function getUsers(){return JSON.parse(localStorage.getItem('felix_users')||'[]')}
+function setUsers(u){localStorage.setItem('felix_users',JSON.stringify(u))}
+function getSales(){let s=localStorage.getItem('felix_sales');if(!s){return []}try{return JSON.parse(s)}catch(e){return []}}
+function setSales(s){localStorage.setItem('felix_sales',JSON.stringify(s))}
+function getWithdrawn(){return parseInt(localStorage.getItem('felix_withdrawn')||'0')}
+function addWithdrawn(a){localStorage.setItem('felix_withdrawn',getWithdrawn()+a)}
+function loadUser(){
+  let cu=localStorage.getItem('felix_current');
+  if(cu){
+    try{
+      currentUser=JSON.parse(cu);
+      updateCircle();
+      syncUserFromServer();
+      // Авто-синк каждые 5 сек если вкладка открыта
+      setInterval(syncUserFromServer, 5000);
+    }catch(e){}
+  }
+}
+async function syncUserFromServer(){
+  if(!currentUser || !currentUser.email) return;
+  try{
+    let res = await fetch((BACKEND_URL||'')+'/api/get_profile?email='+encodeURIComponent(currentUser.email), {cache: 'no-store'});
+    if(res.ok){
+      let serverUser = await res.json();
+      let changed=false;
+      if(serverUser.avatar && serverUser.avatar !== currentUser.avatar){currentUser.avatar = serverUser.avatar;changed=true;}
+      if(serverUser.name && serverUser.name !== currentUser.name){currentUser.name = serverUser.name;changed=true;}
+      if(changed){
+        localStorage.setItem('felix_current', JSON.stringify(currentUser));
+        let users=JSON.parse(localStorage.getItem('felix_users')||'[]');
+        let idx=users.findIndex(x=>x.email.toLowerCase()===currentUser.email.toLowerCase());
+        if(idx>=0){if(serverUser.avatar) users[idx].avatar=serverUser.avatar;if(serverUser.name) users[idx].name=serverUser.name;localStorage.setItem('felix_users', JSON.stringify(users));}
+        updateCircle();
+        let avBig=document.getElementById('avatarBig');
+        if(avBig && currentUser.avatar) avBig.src=currentUser.avatar;
+        console.log('🔄 Синхронизировано с сервера');
+      }
+    }
+  }catch(e){ console.log('sync error', e); }
+}
+
+function updateCircle(){let icon=document.getElementById('profileIcon');let img=document.getElementById('profileCircleImg');if(currentUser&&currentUser.avatar){icon.style.display='none';img.style.display='block';img.src=currentUser.avatar}else{icon.style.display='flex';img.style.display='none'}}
+function toggleCabinet(){let p=document.getElementById('profilePanel');let o=document.getElementById('cabinetOverlay');if(p.classList.contains('active')){closeCabinet()}else{renderCabinet();p.classList.add('active');o.classList.add('active')}}
+function closeCabinet(){document.getElementById('profilePanel').classList.remove('active');document.getElementById('cabinetOverlay').classList.remove('active')}
+function renderCabinet(){
+ let panel=document.getElementById('profilePanel');let sales=getSales();let bal=sales.reduce((a,b)=>a+b.amount,0)-getWithdrawn();
+ if(!currentUser){panel.className='';panel.classList.add('compact');panel.innerHTML='<div class="cabinet-stack compact"><div class="cabinet-pill" onclick="closeCabinet();openAuth()">Зарегистрироваться / Войти</div></div>';return}
+ panel.classList.remove('compact');let isOwner=currentUser.role==='owner';
+ if(isOwner){panel.innerHTML='<div class="cabinet-avatar-corner"><div style="width:36px;height:36px;background:rgba(0,0,0,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center">👤</div></div><div class="cabinet-stack"><div class="cabinet-pill" onclick="closeCabinet();openFullPage(\'profilePage\');loadProfile()">Настройка профиля</div><div class="cabinet-pill" onclick="closeCabinet();openFullPage(\'statsPage\');renderStats()">Статистика</div><div class="cabinet-pill widget">Баланс '+bal.toLocaleString('ru-RU')+' ₽</div></div>';}else{panel.innerHTML='<div class="cabinet-stack compact"><div class="cabinet-pill" onclick="closeCabinet();openFullPage(\'profilePage\');loadProfile()">Настройка профиля</div></div>';}
+ let av=panel.querySelector('.cabinet-avatar-corner');if(currentUser.avatar&&av){av.innerHTML='<img src="'+currentUser.avatar+'" style="width:100%;height:100%;object-fit:cover">'}
+}
+function openAuth(){document.getElementById('authOverlay').classList.add('active')}
+function closeAuth(){document.getElementById('authOverlay').classList.remove('active')}
+function switchAuth(t){document.getElementById('tabLogin').classList.toggle('active',t==='login');document.getElementById('tabReg').classList.toggle('active',t==='reg');document.getElementById('loginForm').style.display=t==='login'?'block':'none';document.getElementById('regForm').style.display=t==='reg'?'block':'none';document.getElementById('authTitle').innerText=t==='login'?'Вход':'Регистрация'}
+function toggleEye(id,btn){let i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.innerText='🙈'}else{i.type='password';btn.innerText='👁️'}}
+function doLogin(){
+ let e=document.getElementById('loginEmail').value.trim();
+ let p=document.getElementById('loginPass').value;
+ fetch((BACKEND_URL||'')+'/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:e, password:p})})
+ .then(r=>r.json().then(d=>({ok:r.ok, data:d})))
+ .then(res=>{
+   if(res.ok){
+     let u=res.data;
+     document.getElementById('loginErr').style.display='none';
+     currentUser=u;
+     localStorage.setItem('felix_current', JSON.stringify(u));
+     let users=getUsers();
+     if(!users.find(x=>x.email===u.email)){
+       users.push({...u, password:p});
+       setUsers(users);
+     }
+     updateCircle(); closeAuth(); renderCabinet();
+   } else {
+     let users=getUsers();
+     let u=users.find(x=>x.email===e&&x.password===p);
+     if(!u){
+       let er=document.getElementById('loginErr'); er.style.display='block'; er.innerText=res.data.error||'Неверный email или пароль'; return;
+     }
+     document.getElementById('loginErr').style.display='none'; currentUser=u; localStorage.setItem('felix_current',JSON.stringify(u)); updateCircle(); closeAuth(); renderCabinet();
+   }
+ })
+ .catch(err=>{
+   let users=getUsers(); let u=users.find(x=>x.email===e&&x.password===p);
+   if(!u){ let er=document.getElementById('loginErr'); er.style.display='block'; er.innerText='Неверный email или пароль (оффлайн)'; return; }
+   document.getElementById('loginErr').style.display='none'; currentUser=u; localStorage.setItem('felix_current',JSON.stringify(u)); updateCircle(); closeAuth(); renderCabinet();
+ });
+}
+function doReg(){
+ let n=document.getElementById('regName').value.trim();
+ let e=document.getElementById('regEmail').value.trim();
+ let p=document.getElementById('regPass').value;
+ let p2=document.getElementById('regPass2').value;
+ if(!n||!e||!p){let er=document.getElementById('regErr');er.style.display='block';er.innerText='Заполните все поля';return}
+ if(p!==p2){let er=document.getElementById('regErr');er.style.display='block';er.innerText='Пароли не совпадают';return}
+ if(p.length<6){let er=document.getElementById('regErr');er.style.display='block';er.innerText='Минимум 6 символов';return}
+ fetch((BACKEND_URL||'')+'/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name:n, email:e, password:p})})
+ .then(r=>r.json().then(d=>({ok:r.ok, data:d})))
+ .then(res=>{
+   if(res.ok){
+     let nu=res.data;
+     document.getElementById('regErr').style.display='none';
+     currentUser=nu; localStorage.setItem('felix_current',JSON.stringify(nu));
+     let users=getUsers(); users.push({...nu, password:p}); setUsers(users);
+     updateCircle(); closeAuth(); renderCabinet();
+   } else {
+     let er=document.getElementById('regErr'); er.style.display='block'; er.innerText=res.data.error||'Ошибка регистрации';
+   }
+ })
+ .catch(err=>{
+   let users=getUsers(); if(users.find(x=>x.email===e)){let er=document.getElementById('regErr');er.style.display='block';er.innerText='Email уже занят (оффлайн)';return}
+   let role=users.length===0?'owner':'user'; let nu={id:Date.now(),name:n,email:e,password:p,role:role,avatar:''}; users.push(nu); setUsers(users); currentUser=nu; localStorage.setItem('felix_current',JSON.stringify(nu)); updateCircle(); closeAuth(); renderCabinet();
+ });
+}
+function openForgot(){closeAuth();document.getElementById('forgotOverlay').classList.add('active');document.getElementById('forgotStep1').style.display='block';document.getElementById('forgotStep2').style.display='none';document.getElementById('forgotStep3').style.display='none'}
+function closeForgot(){document.getElementById('forgotOverlay').classList.remove('active')}
+function sendCode(isResend){let email=document.getElementById('forgotEmail').value.trim();let e=isResend?localStorage.getItem('felix_pendingEmail'):email;let users=getUsers();if(!users.find(x=>x.email===e)){let er=document.getElementById('forgotErr1');er.style.display='block';er.innerText='Пользователь не найден';return}let code=Math.floor(100000+Math.random()*900000);localStorage.setItem('felix_pendingCode',code);localStorage.setItem('felix_pendingEmail',e);document.getElementById('forgotEmailShow').innerText=e;document.getElementById('demoCodeBox').innerText='Демо-код: '+code;document.getElementById('forgotStep1').style.display='none';document.getElementById('forgotStep2').style.display='block';document.getElementById('forgotErr1').style.display='none'}
+function checkCode(){let c=document.getElementById('forgotCode').value.trim();let real=localStorage.getItem('felix_pendingCode');if(c!==real){let er=document.getElementById('forgotErr2');er.style.display='block';er.innerText='Неверный код';return}document.getElementById('forgotStep2').style.display='none';document.getElementById('forgotStep3').style.display='block'}
+function setNewPass(){let p1=document.getElementById('newPass1').value;let p2=document.getElementById('newPass2').value;if(p1!==p2){let er=document.getElementById('forgotErr3');er.style.display='block';er.innerText='Пароли не совпадают';return}if(p1.length<6){let er=document.getElementById('forgotErr3');er.style.display='block';er.innerText='Минимум 6 символов';return}let email=localStorage.getItem('felix_pendingEmail');let users=getUsers();let u=users.find(x=>x.email===email);if(u){u.password=p1;setUsers(users);document.getElementById('forgotErr3').style.display='none';document.getElementById('forgotSuccess').style.display='block';setTimeout(()=>{closeForgot();openAuth();switchAuth('login')},1500);localStorage.removeItem('felix_pendingCode');localStorage.removeItem('felix_pendingEmail')}}
+function openFullPage(id){document.getElementById(id).classList.add('active')}
+function closeFullPage(id){document.getElementById(id).classList.remove('active')}
+function loadProfile(){if(!currentUser)return;document.getElementById('pName').value=currentUser.name;document.getElementById('pEmail').value=currentUser.email;let av=document.getElementById('avatarBig');if(currentUser.avatar)av.src=currentUser.avatar}
+function uploadAvatar(e){
+  let f=e.target.files[0];if(!f)return;
+  let reader=new FileReader();
+  reader.onload=function(ev){
+    let img=new Image();
+    img.onload=function(){
+      let canvas=document.createElement('canvas');let size=256;canvas.width=size;canvas.height=size;let ctx=canvas.getContext('2d');
+      let min=Math.min(img.width, img.height);let sx=(img.width-min)/2, sy=(img.height-min)/2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      let data=canvas.toDataURL('image/jpeg', 0.8);
+      currentUser.avatar=data;let users=getUsers();let idx=users.findIndex(x=>x.id===currentUser.id);if(idx>=0){users[idx].avatar=data;setUsers(users)}
+      localStorage.setItem('felix_current',JSON.stringify(currentUser));document.getElementById('avatarBig').src=data;updateCircle();renderCabinet();
+      // Сразу на сервер с no-cache
+      fetch((BACKEND_URL||'')+'/api/update_profile', {method:'POST', headers:{'Content-Type':'application/json','Cache-Control':'no-cache'}, body: JSON.stringify({email: currentUser.email, avatar: data})}).then(r=>r.json()).then(res=>{console.log('✅ Ава синхронизирована');}).catch(err=>{});
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(f);
+}
+function saveProfile(){let n=document.getElementById('pName').value.trim();let e=document.getElementById('pEmail').value.trim();if(!n||!e)return;currentUser.name=n;currentUser.email=e;let users=getUsers();let idx=users.findIndex(x=>x.id===currentUser.id);if(idx>=0){users[idx].name=n;users[idx].email=e;setUsers(users)}localStorage.setItem('felix_current',JSON.stringify(currentUser));closeFullPage('profilePage');renderCabinet()}
+function logout(){currentUser=null;localStorage.removeItem('felix_current');closeFullPage('profilePage');closeCabinet();renderCabinet();updateCircle()}
+function renderStats(){let sales=getSales();let total=sales.reduce((a,b)=>a+b.amount,0);let withdrawn=getWithdrawn();let bal=total-withdrawn;document.getElementById('kpiTotal').innerText=bal.toLocaleString('ru-RU')+' ₽';document.getElementById('kpiCount').innerText=sales.length;let today=new Date();today.setHours(0,0,0,0);let todaySum=sales.filter(s=>new Date(s.date)>=today).reduce((a,b)=>a+b.amount,0);document.getElementById('kpiToday').innerText=todaySum.toLocaleString('ru-RU')+' ₽';let list=document.getElementById('buyerList');list.innerHTML='';if(sales.length===0){list.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;background:rgba(255,255,255,0.04);border-radius:16px;border:1px dashed rgba(255,255,255,0.15)">Пока нет продаж<br><span style="font-size:12px;opacity:0.7">Здесь появятся покупатели после реальных оплат</span></div>'}else{sales.slice().reverse().forEach(s=>{let d=new Date(s.date);let ago=Math.floor((Date.now()-d)/60000);let agoStr=ago<60?ago+' мин назад':Math.floor(ago/60)+' ч назад';let div=document.createElement('div');div.className='buyer';div.innerHTML='<div><div class="name">'+s.name+'</div><div class="prod">'+s.product+' • '+agoStr+'</div></div><div class="price">'+s.amount.toLocaleString('ru-RU')+' ₽</div>';list.appendChild(div)});}renderBars()}
+function setPeriod(p,el){currentPeriod=p;document.querySelectorAll('.period').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderBars()}
+function renderBars(){let sales=getSales();let container=document.getElementById('bars');container.innerHTML='';let groups=[];let now=new Date();
+if(currentPeriod==='1 день'){for(let h=0;h<24;h+=4){let start=new Date();start.setHours(h,0,0,0);let end=new Date();end.setHours(h+4,0,0,0);let sum=sales.filter(s=>{let d=new Date(s.date);return d>=start&&d<end}).reduce((a,b)=>a+b.amount,0);groups.push({label:('0'+h).slice(-2)+':00',long:('0'+h).slice(-2)+':00',sum})}
+}else if(currentPeriod==='Неделя'){for(let i=6;i>=0;i--){let d=new Date();d.setDate(now.getDate()-i);let start=new Date(d);start.setHours(0,0,0,0);let end=new Date(d);end.setHours(23,59,59,999);let sum=sales.filter(s=>{let dd=new Date(s.date);return dd>=start&&dd<=end}).reduce((a,b)=>a+b.amount,0);let label=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});groups.push({label:label,long:label,sum})}
+}else if(currentPeriod==='Месяц'){for(let i=29;i>=0;i-=3){let d=new Date();d.setDate(now.getDate()-i);let start=new Date(d);start.setHours(0,0,0,0);let end=new Date(d);end.setDate(end.getDate()+3);let sum=sales.filter(s=>{let dd=new Date(s.date);return dd>=start&&dd<end}).reduce((a,b)=>a+b.amount,0);let labelShort=d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});let labelLong=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});groups.push({label:labelShort,long:labelLong,sum})}
+}else{let months=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];for(let i=11;i>=0;i--){let d=new Date();d.setMonth(now.getMonth()-i);let m=d.getMonth();let y=d.getFullYear();let sum=sales.filter(s=>{let dd=new Date(s.date);return dd.getMonth()===m&&dd.getFullYear()===y}).reduce((a,b)=>a+b.amount,0);groups.push({label:months[m],long:months[m]+' '+y,sum})}}
+let max=Math.max(...groups.map(g=>g.sum),1);
+groups.forEach(g=>{let wrap=document.createElement('div');wrap.className='bar-wrap';let bar=document.createElement('div');bar.className='bar';bar.style.height=(g.sum/max*100+5)+'%';let tip=document.createElement('div');tip.className='tooltip';tip.innerHTML='<div class="t-date">'+g.long+'</div><div class="t-price">'+g.sum.toLocaleString('ru-RU')+' ₽</div>';wrap.appendChild(tip);wrap.appendChild(bar);let lab=document.createElement('div');lab.className='bar-label';lab.innerText=g.label;wrap.appendChild(lab);container.appendChild(wrap)})
+}
+
+function openWithdraw(){if(currentUser.role!=='owner'){alert('Доступно только владельцу');return}closeFullPage('statsPage');openFullPage('withdrawPage');let sales=getSales();let bal=sales.reduce((a,b)=>a+b.amount,0)-getWithdrawn();document.getElementById('withdrawAvail').innerText='Доступно: '+bal.toLocaleString('ru-RU')+' ₽';document.getElementById('wErr').style.display='none';document.getElementById('wSuccess').style.display='none'}
+function setMax(){let sales=getSales();let bal=sales.reduce((a,b)=>a+b.amount,0)-getWithdrawn();document.getElementById('wAmount').value=bal}
+function formatCard(el){let v=el.value.replace(/\D/g,'').slice(0,16);el.value=v.replace(/(.{4})/g,'$1 ').trim()}
+function formatExp(el){let v=el.value.replace(/\D/g,'').slice(0,4);if(v.length>=3)el.value=v.slice(0,2)+'/'+v.slice(2);else el.value=v}
+function onMethodChange(){let m=document.getElementById('wMethod').value;document.getElementById('sbpPhoneWrap').style.display=m==='sbp'?'block':'none';document.getElementById('cardFields').style.display=m==='card'?'block':'none'}
+function doWithdraw(){let amount=parseInt(document.getElementById('wAmount').value);let bank=document.getElementById('wBank').value;let method=document.getElementById('wMethod').value;let err=document.getElementById('wErr');err.style.display='none';let sales=getSales();let bal=sales.reduce((a,b)=>a+b.amount,0)-getWithdrawn();if(!amount||amount<=0){err.style.display='block';err.innerText='Введите сумму';return}if(amount>bal){err.style.display='block';err.innerText='Недостаточно средств';return}if(!bank){err.style.display='block';err.innerText='Выберите банк';return}if(method==='card'){let num=document.getElementById('wCardNum').value.replace(/\s/g,'');let exp=document.getElementById('wExp').value;let cvc=document.getElementById('wCvc').value;let name=document.getElementById('wName').value.trim();if(num.length!==16){err.style.display='block';err.innerText='Номер 16 цифр';return}if(!/^\d{2}\/\d{2}$/.test(exp)){err.style.display='block';err.innerText='ММ/ГГ';return}if(cvc.length!==3){err.style.display='block';err.innerText='CVC 3 цифры';return}if(name.length<2){err.style.display='block';err.innerText='Имя получателя';return}document.getElementById('wSuccess').style.display='block';document.getElementById('wSuccess').innerText='Переводим...';setTimeout(()=>{addWithdrawn(amount);document.getElementById('wSuccess').innerText='Успешно!';setTimeout(()=>{closeFullPage('withdrawPage');openFullPage('statsPage');renderStats();renderCabinet()},1500)},1500)}else if(method==='sbp'){let phone=document.getElementById('wPhone').value.trim();if(phone.length<10){err.style.display='block';err.innerText='Введите телефон';return}closeFullPage('withdrawPage');openQR(amount,bank)}else{document.getElementById('wSuccess').style.display='block';document.getElementById('wSuccess').innerText='Переводим...';setTimeout(()=>{addWithdrawn(amount);document.getElementById('wSuccess').innerText='Успешно!';setTimeout(()=>{closeFullPage('withdrawPage');openFullPage('statsPage');renderStats();renderCabinet()},1500)},1500)}}
+let qrTimerInt=null;
+function openQR(amount,bank){openFullPage('qrPage');document.getElementById('qrAmount').innerText='К выводу: '+amount.toLocaleString('ru-RU')+' ₽';document.getElementById('qrBank').innerText=bank;document.getElementById('qrStatus').innerText='Отсканируйте QR в приложении банка и подтвердите в банке';document.getElementById('newQrBtn').style.display='none';createQRGrid();startQRTimer();simulateQRSuccess(amount)}
+function createQRGrid(){let grid=document.getElementById('qrGrid');grid.innerHTML='';for(let i=0;i<625;i++){let cell=document.createElement('div');cell.className='qr-cell';if(Math.random()>0.5)cell.classList.add('black');grid.appendChild(cell)}}
+function startQRTimer(){if(qrTimerInt)clearInterval(qrTimerInt);let sec=300;let timerEl=document.getElementById('qrTimer');qrTimerInt=setInterval(()=>{sec--;let m=Math.floor(sec/60);let s=sec%60;timerEl.innerText=('0'+m).slice(-2)+':'+('0'+s).slice(-2);if(sec<=0){clearInterval(qrTimerInt);timerEl.innerText='00:00';document.getElementById('qrStatus').innerText='QR истек';document.getElementById('newQrBtn').style.display='block';document.getElementById('scanPulse').style.display='none'}},1000)}
+function simulateQRSuccess(amount){document.getElementById('scanPulse').style.display='block';setTimeout(()=>{document.getElementById('qrStatus').innerText='Сканирование...'},3000);setTimeout(()=>{document.getElementById('qrStatus').innerText='Подтверждение в банке...'},6000);setTimeout(()=>{if(qrTimerInt)clearInterval(qrTimerInt);document.getElementById('qrStatus').innerText='Подтверждено! Деньги отправлены';document.getElementById('scanPulse').style.display='none';addWithdrawn(amount);setTimeout(()=>{closeFullPage('qrPage');openFullPage('statsPage');renderStats();renderCabinet()},1500)},8000)}
+function createQR(){let amt=parseInt(document.getElementById('qrAmount').innerText.replace(/\D/g,''));let bank=document.getElementById('qrBank').innerText;openQR(amt,bank)}
+function cancelQR(){if(qrTimerInt)clearInterval(qrTimerInt);closeFullPage('qrPage');openFullPage('withdrawPage')}
+
+
+let subQrTimerInt=null;
+const SUB_LINK="happ://add/https://oversub.cloud/A1PgmYGPaJ2rDDvX";
+const SUB_PRICE=150;
+const BACKEND_URL = "";
+
+function isSubPaid(){ 
+ let globalPaid=localStorage.getItem('felix_sub_paid')==='true';
+ let userPaid=currentUser && localStorage.getItem('felix_sub_paid_'+currentUser.id)==='true';
+ let botPaid=localStorage.getItem('felix_bot_paid')==='true' || (currentUser && localStorage.getItem('felix_bot_paid_'+currentUser.id)==='true');
+ return globalPaid || userPaid || botPaid;
+}
+
+async function checkServerPaid(){
+ let tg = localStorage.getItem('felix_tg_username');
+ if(!tg) return false;
+ try {
+   let res = await fetch(`${BACKEND_URL}/api/check_bot_payment?username=${encodeURIComponent(tg)}`);
+   let data = await res.json();
+   if(data.paid){
+     localStorage.setItem('felix_bot_paid','true');
+     localStorage.setItem('felix_sub_paid','true');
+     if(currentUser) {
+       localStorage.setItem('felix_bot_paid_'+currentUser.id,'true');
+       localStorage.setItem('felix_sub_paid_'+currentUser.id,'true');
+     }
+     return true;
+   }
+ } catch(e){ console.log('checkServerPaid error', e); }
+ return false;
+}
+
+async function handleSubscribeClick(){
+ let statusEl=document.getElementById('subStatus');
+ await checkServerPaid();
+ if(isSubPaid()){
+   if(statusEl){statusEl.style.display='block';statusEl.innerText='✅ Подписка уже оплачена, выдаем...';}
+   setTimeout(()=>{giveSubscription()},500);
+   return;
+ }
+ openFullPage('subPayPage');
+ document.getElementById('subAfterPay').style.display='none';
+ document.getElementById('subPayErr').style.display='none';
+ document.getElementById('subPaySuccess').style.display='none';
+ switchPayTab('card');
+ checkPaymentFromUrl();
+}
+
+function giveSubscription(){
+ localStorage.setItem('felix_sub_paid','true');
+ if(currentUser) localStorage.setItem('felix_sub_paid_'+currentUser.id,'true');
+ let statusEl=document.getElementById('subStatus');
+ if(statusEl){statusEl.style.display='block';statusEl.innerText='✅ Подписка добавлена! Открываем приложение...';}
+ setTimeout(()=>{ window.location.href=SUB_LINK; }, 300);
+ setTimeout(()=>{ closeFullPage('subPayPage'); }, 1500);
+}
+
+function switchPayTab(tab){
+ document.getElementById('payTabCard').classList.toggle('active',tab==='card');
+ document.getElementById('payTabSbp').classList.toggle('active',tab==='sbp');
+ document.getElementById('payTabBot').classList.toggle('active',tab==='bot');
+ document.getElementById('payCardForm').style.display=tab==='card'?'block':'none';
+ document.getElementById('paySbpForm').style.display=tab==='sbp'?'block':'none';
+ document.getElementById('payBotForm').style.display=tab==='bot'?'block':'none';
+ if(tab==='sbp'){ createSubQR(); }
+}
+
+async function payWithCard(){
+ let num=document.getElementById('subCardNum').value.replace(/\s/g,'');
+ let exp=document.getElementById('subExp').value;
+ let cvc=document.getElementById('subCvc').value;
+ let name=document.getElementById('subName').value.trim();
+ let err=document.getElementById('subPayErr');
+ err.style.display='none';
+ if(num.length!==16){err.style.display='block';err.innerText='Номер карты 16 цифр';return;}
+ if(!/^\d{2}\/\d{2}$/.test(exp)){err.style.display='block';err.innerText='ММ/ГГ';return;}
+ if(cvc.length!==3){err.style.display='block';err.innerText='CVC 3 цифры';return;}
+ if(name.length<2){err.style.display='block';err.innerText='Имя на карте';return;}
+ let success=document.getElementById('subPaySuccess');
+ success.style.display='block';success.innerText='Создаем платеж через ЮKassa 150₽...';
+ try {
+   let res = await fetch(`${BACKEND_URL}/api/create_site_payment`, {
+     method: 'POST',
+     headers: {'Content-Type':'application/json'},
+     body: JSON.stringify({amount: SUB_PRICE, username: localStorage.getItem('felix_tg_username') || (currentUser?currentUser.email:''), user_id: currentUser?currentUser.id:null, method: 'card'})
+   });
+   let data = await res.json();
+   if(data.confirmation_url){
+     success.innerText='Переходим к оплате...';
+     window.location.href = data.confirmation_url;
+   } else {
+     err.style.display='block';err.innerText=data.error || 'Ошибка создания платежа';
+     success.style.display='none';
+   }
+ } catch(e){
+   err.style.display='block';err.innerText='Ошибка соединения с сервером. Убедись что бэкенд запущен.';
+   success.style.display='none';
+ }
+}
+
+function createSubQR(){
+ let grid=document.getElementById('subQrGrid');grid.innerHTML='';for(let i=0;i<625;i++){let cell=document.createElement('div');cell.className='qr-cell';if(Math.random()>0.5)cell.classList.add('black');grid.appendChild(cell);}
+ payWithSbp();
+}
+
+async function payWithSbp(){
+ let statusEl=document.getElementById('subSbpStatus');
+ statusEl.innerText='Создаем СБП платеж 150₽...';
+ try {
+   let res = await fetch(`${BACKEND_URL}/api/create_site_payment`, {
+     method: 'POST',
+     headers: {'Content-Type':'application/json'},
+     body: JSON.stringify({amount: SUB_PRICE, method: 'sbp', username: localStorage.getItem('felix_tg_username') || ''})
+   });
+   let data = await res.json();
+   if(data.confirmation_url){
+     statusEl.innerText='Переходим к оплате СБП...';
+     window.location.href = data.confirmation_url;
+   } else {
+     statusEl.innerText='Ошибка: '+(data.error||'не удалось создать платеж');
+   }
+ } catch(e){
+   statusEl.innerText='Ошибка соединения с бэкендом. Для превью показываем демо QR.';
+   document.getElementById('subScanPulse').style.display='block';
+ }
+}
+
+async function checkBotPayment(){
+ let username=document.getElementById('botUsername').value.trim();
+ let err=document.getElementById('botErr');let success=document.getElementById('botSuccess');
+ err.style.display='none';success.style.display='none';
+ if(!username){err.style.display='block';err.innerText='Введите @username';return;}
+ if(!username.startsWith('@')) username='@'+username;
+ success.style.display='block';success.innerText='Проверяем оплату в боте для '+username+'...';
+ try {
+   let res = await fetch(`${BACKEND_URL}/api/check_bot_payment?username=${encodeURIComponent(username)}`);
+   let data = await res.json();
+   if(data.paid){
+     success.innerText='✅ Оплата через бота найдена! Подписка оплачена.';
+     localStorage.setItem('felix_bot_paid','true');
+     localStorage.setItem('felix_sub_paid','true');
+     localStorage.setItem('felix_tg_username',username);
+     if(currentUser){
+       localStorage.setItem('felix_bot_paid_'+currentUser.id,'true');
+       localStorage.setItem('felix_sub_paid_'+currentUser.id,'true');
+     }
+     document.getElementById('subAfterPay').style.display='block';
+   } else {
+     err.style.display='block';err.innerText=data.message || 'Оплата не найдена. Убедитесь что оплатили через бота @Felix_dog1785';
+     success.style.display='none';
+   }
+ } catch(e){
+   err.style.display='block';err.innerText='Ошибка соединения с сервером проверки.';
+   success.style.display='none';
+ }
+}
+
+function checkPaymentFromUrl(){
+ let params=new URLSearchParams(window.location.search);
+ let paymentId=params.get('payment_id');
+ if(paymentId){
+   fetch(`${BACKEND_URL}/api/check_payment_status?payment_id=${paymentId}`)
+     .then(r=>r.json())
+     .then(data=>{
+       if(data.status==='succeeded'){
+         localStorage.setItem('felix_sub_paid','true');
+         if(currentUser) localStorage.setItem('felix_sub_paid_'+currentUser.id,'true');
+         document.getElementById('subAfterPay').style.display='block';
+         document.getElementById('subPaySuccess').style.display='block';
+         document.getElementById('subPaySuccess').innerText='✅ Оплата 150₽ подтверждена!';
+         window.history.replaceState({}, document.title, window.location.pathname);
+       }
+     });
+ }
+ if(params.get('bot_paid')==='1'){
+   localStorage.setItem('felix_bot_paid','true');
+   localStorage.setItem('felix_sub_paid','true');
+   if(params.get('username')) localStorage.setItem('felix_tg_username', params.get('username'));
+   let el=document.getElementById('subStatus');
+   if(el){el.style.display='block';el.innerText='✅ Оплата через бота подтверждена!';}
+   window.history.replaceState({}, document.title, window.location.pathname);
+ }
+}
+checkPaymentFromUrl();
+
+
+
+function deleteAccount(){
+ if(!currentUser){ alert('Вы не вошли'); return; }
+ if(!confirm('Точно удалить аккаунт '+currentUser.email+'? Это действие необратимо!')) return;
+ let pass = prompt('Для удаления аккаунта введите пароль для подтверждения:\nEmail: '+currentUser.email);
+ if(!pass) return;
+ // Сначала пробуем сервер
+ fetch((BACKEND_URL||'')+'/api/delete_account', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email: currentUser.email, password: pass})})
+ .then(r=>r.json().then(d=>({ok:r.ok, data:d, status:r.status})))
+ .then(res=>{
+   console.log('delete response', res);
+   if(res.ok){
+     alert('Аккаунт удален (сервер): ' + (res.data.message||''));
+     // чистим локально в любом случае
+     let users=getUsers(); users = users.filter(x=>x.email.toLowerCase()!==currentUser.email.toLowerCase()); setUsers(users);
+     localStorage.removeItem('felix_current');
+     currentUser=null; updateCircle(); closeFullPage('profilePage'); renderCabinet();
+   } else {
+     // Если сервер говорит неверный пароль или не найден - все равно удаляем локально и показываем
+     if(res.data && (res.data.error && res.data.error.toLowerCase().includes('неверный')) || res.data.server_not_found){
+       if(confirm('На сервере аккаунт не найден или пароль не совпал (возможно Render стер файл). Удалить локально на этом устройстве?')){
+         let users=getUsers(); users = users.filter(x=>x.email.toLowerCase()!==currentUser.email.toLowerCase()); setUsers(users);
+         localStorage.removeItem('felix_current');
+         currentUser=null; updateCircle(); closeFullPage('profilePage'); renderCabinet();
+         alert('Аккаунт удален локально на этом устройстве');
+       }
+     } else {
+       let errEl=document.getElementById('delAccErr'); if(errEl){ errEl.style.display='block'; errEl.innerText=res.data.error||'Ошибка удаления'; }
+       else alert(res.data.error||'Ошибка');
+     }
+   }
+ })
+ .catch(e=>{
+   console.error(e);
+   // Если нет связи с сервером - удаляем локально
+   if(confirm('Нет связи с сервером. Удалить аккаунт локально на этом устройстве?')){
+     let users=getUsers(); users = users.filter(x=>x.email.toLowerCase()!==currentUser.email.toLowerCase()); setUsers(users);
+     localStorage.removeItem('felix_current');
+     currentUser=null; updateCircle(); closeFullPage('profilePage'); renderCabinet();
+     alert('Аккаунт удален локально');
+   }
+ });
+}
+
+function toggleTheme(){document.body.classList.toggle('light')}
+loadUser();renderCabinet();
+// Показать статус подписки если оплачена
+if(isSubPaid()){let el=document.getElementById('subStatus');if(el){el.style.display='block';el.innerText='✅ Подписка оплачена (150₽ навсегда)';}}
+</script>
+</body>
+</html>
